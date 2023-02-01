@@ -46,8 +46,8 @@ namespace BetAPI.Models
                 context.Bet.AddRange(
                     new Bet
                     {
-                        UserId = FirstUser.Id,
-                        EventId = FirstEvent.Id,
+                        User= FirstUser,
+                        Event= FirstEvent,
                         IsCompleted = false,
                         Opt = 2,
                         Stake = 10.12m,

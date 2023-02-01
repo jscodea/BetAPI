@@ -1,9 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using static System.Reflection.Metadata.BlobBuilder;
 
 namespace BetAPI.Models
 {
-    public class User
+    public class User: BaseEntity
     {
+        public User()
+        {
+            Bets = new HashSet<Bet>();
+        }
+
         public int Id { get; set; }
 
         public bool IsActive { get; set; }
@@ -16,10 +22,6 @@ namespace BetAPI.Models
         [Range(0, 9999999999999999.99)]
         public decimal Balance { get; set; }
 
-        [DataType(DataType.Date)]
-        public DateTime CreatedAt { get; set; }
-
-        [DataType(DataType.Date)]
-        public DateTime UpdatedAt { get; set; }
+        public virtual ICollection<Bet> Bets { get; set; }
     }
 }

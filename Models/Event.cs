@@ -2,7 +2,7 @@
 
 namespace BetAPI.Models
 {
-    public class Event
+    public class Event: BaseEntity
     {
         public int Id { get; set; }
 
@@ -24,11 +24,5 @@ namespace BetAPI.Models
 
         [DataType(DataType.Date)]
         public DateTime EndsAt { get; set; }
-
-        [DataType(DataType.Date)]
-        public DateTime CreatedAt { get; set; }
-
-        [DataType(DataType.Date)]
-        public DateTime UpdatedAt { get; set; }
     }
 }

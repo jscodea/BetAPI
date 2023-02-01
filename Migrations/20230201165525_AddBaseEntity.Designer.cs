@@ -4,6 +4,7 @@ using BetAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BetAPI.Migrations
 {
     [DbContext(typeof(BetAPIContext))]
-    partial class BetAPIContextModelSnapshot : ModelSnapshot
+    [Migration("20230201165525_AddBaseEntity")]
+    partial class AddBaseEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -58,10 +61,6 @@ namespace BetAPI.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("EventId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Bet");
                 });
@@ -132,30 +131,6 @@ namespace BetAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("User");
-                });
-
-            modelBuilder.Entity("BetAPI.Models.Bet", b =>
-                {
-                    b.HasOne("BetAPI.Models.Event", "Event")
-                        .WithMany()
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BetAPI.Models.User", "User")
-                        .WithMany("Bets")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Event");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("BetAPI.Models.User", b =>
-                {
-                    b.Navigation("Bets");
                 });
 #pragma warning restore 612, 618
         }

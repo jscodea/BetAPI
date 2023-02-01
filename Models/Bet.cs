@@ -2,13 +2,9 @@
 
 namespace BetAPI.Models
 {
-    public class Bet
+    public class Bet: BaseEntity
     {
         public int Id { get; set; }
-
-        public int UserId { get; set; }
-
-        public int EventId { get; set; }
 
         public bool IsCompleted { get; set; }
 
@@ -26,10 +22,7 @@ namespace BetAPI.Models
         [Range(0, 9999999999999999.99)]
         public decimal Odds { get; set; }
 
-        [DataType(DataType.Date)]
-        public DateTime CreatedAt { get; set; }
-
-        [DataType(DataType.Date)]
-        public DateTime UpdatedAt { get; set; }
+        public virtual User User { get; set; }
+        public virtual Event Event { get; set; }
     }
 }
