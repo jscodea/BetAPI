@@ -4,6 +4,11 @@ namespace BetAPI.Models
 {
     public class Event: BaseEntity
     {
+        public Event()
+        {
+            Bets = new HashSet<Bet>();
+        }
+
         public int Id { get; set; }
 
         public string ?Name { get; set; }
@@ -24,5 +29,7 @@ namespace BetAPI.Models
 
         [DataType(DataType.Date)]
         public DateTime EndsAt { get; set; }
+
+        public virtual ICollection<Bet> Bets { get; set; }
     }
 }
