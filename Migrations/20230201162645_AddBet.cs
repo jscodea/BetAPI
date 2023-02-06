@@ -22,8 +22,8 @@ namespace BetAPI.Migrations
                     Stake = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Payout = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Odds = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValue: DateTime.Now),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValue: DateTime.Now)
                 },
                 constraints: table =>
                 {

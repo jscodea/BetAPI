@@ -1,6 +1,7 @@
 
 using BetAPI.Data;
 using BetAPI.Models;
+using BetAPI.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace BetAPI
@@ -14,20 +15,20 @@ namespace BetAPI
                 options.UseSqlServer(builder.Configuration.GetConnectionString("BetAPIContext")));
 
             // Add services to the container.
-
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddTransient<IBetService, BetService>();
 
             var app = builder.Build();
 
-            /*using (var scope = app.Services.CreateScope())
+            using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
 
                 SeedData.Initialize(services);
-            }*/
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

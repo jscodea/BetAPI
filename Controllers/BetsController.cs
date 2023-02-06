@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BetAPI.Data;
 using BetAPI.Models;
+using BetAPI.DTO;
+using BetAPI.Services;
 
 namespace BetAPI.Controllers
 {
@@ -15,32 +17,26 @@ namespace BetAPI.Controllers
     public class BetsController : ControllerBase
     {
         private readonly BetAPIContext _context;
+        private readonly IBetService _betService;
 
-        public BetsController(BetAPIContext context)
+        public BetsController(BetAPIContext context, IBetService betService)
         {
             _context = context;
+            _betService = betService;
         }
 
         // GET: api/Bets
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Bet>>> GetBet()
+        public async Task<ActionResult<List<BetDTO>>> GetBet()
         {
-          if (_context.Bet == null)
-          {
-              return NotFound();
-          }
-            return await _context.Bet.ToListAsync();
+            return await _betService.GetBetsAsync();
         }
 
         // GET: api/Bets/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Bet>> GetBet(int id)
+        public async Task<ActionResult<BetDTO>> GetBet(int id)
         {
-          if (_context.Bet == null)
-          {
-              return NotFound();
-          }
-            var bet = await _context.Bet.FindAsync(id);
+            var bet = await _betService.GetBetAsync(id);
 
             if (bet == null)
             {
@@ -84,16 +80,10 @@ namespace BetAPI.Controllers
         // POST: api/Bets
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Bet>> PostBet(Bet bet)
+        public async Task<IActionResult> PostBet(Bet bet)
         {
-          if (_context.Bet == null)
-          {
-              return Problem("Entity set 'BetAPIContext.Bet'  is null.");
-          }
-            _context.Bet.Add(bet);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetBet", new { id = bet.Id }, bet);
+            await _betService.InsertBetAsync(bet);
+            return NoContent();
         }
 
         // DELETE: api/Bets/5

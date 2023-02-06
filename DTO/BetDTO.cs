@@ -1,10 +1,12 @@
 ﻿using BetAPI.Models;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace BetAPI.DTO
 {
     public class BetDTO
     {
+        [JsonIgnore]
         public int Id { get; set; }
 
         public bool IsCompleted { get; set; }
@@ -17,7 +19,7 @@ namespace BetAPI.DTO
 
         public decimal Odds { get; set; }
 
-        public virtual User User { get; set; }
-        public virtual Event Event { get; set; }
+        public int UserId { get; set; }
+        public int EventId { get; set; }
     }
 }

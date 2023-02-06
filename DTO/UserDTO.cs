@@ -7,7 +7,7 @@ namespace BetAPI.DTO
     {
         public UserDTO()
         {
-            Bets = new HashSet<Bet>();
+            BetIds = new List<int>();
         }
 
         public int Id { get; set; }
@@ -20,6 +20,6 @@ namespace BetAPI.DTO
 
         public decimal Balance { get; set; }
 
-        public virtual ICollection<Bet> Bets { get; set; }
+        public List<int> BetIds { get; set; }
     }
 }

@@ -21,8 +21,8 @@ namespace BetAPI.Migrations
                     Opt1 = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Opt2 = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     BetsAllowedFrom = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    StartsAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EndsAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    StartsAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValue: DateTime.Now),
+                    EndsAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValue: DateTime.Now)
                 },
                 constraints: table =>
                 {
