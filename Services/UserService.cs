@@ -68,22 +68,22 @@ namespace BetAPI.Services
             return await _context.SaveChangesAsync();
         }
 
-        public async Task<int> UpdateBalance(int id, decimal stake)
+        public async Task<int> UpdateBalance(int id, decimal change)
         {
             User? existingUser = await _context.User.FirstOrDefaultAsync(i => i.Id == id);
-            if (existingUser == null || BalanceIsUpdating(existingUser.BalanceUpdateStarted))
+            if (existingUser == null || IsUpdating(id))
             {
                 return 0;
             }
 
-            int updateSet = await SetBalanceUpdate(id, true);
-
-            if (updateSet == 0)
+            bool updateSet = await SetBalanceUpdate(id, true);
+            //TODO probably should think about throwing exceptions etc. not informative
+            if (!updateSet)
             {
                 return 0;
             }
 
-            existingUser.Balance = existingUser.Balance + stake;
+            existingUser.Balance = existingUser.Balance + change;
 
             int balanceUpdated = await _context.SaveChangesAsync();
 
@@ -92,23 +92,34 @@ namespace BetAPI.Services
             return balanceUpdated;
         }
 
-        private async Task<int> SetBalanceUpdate(int id, bool setUpdating)
+        private async Task<bool> SetBalanceUpdate(int id, bool setUpdating)
         {
             User? existingUser = await _context.User.FirstOrDefaultAsync(i => i.Id == id);
             if (existingUser == null)
             {
-                return 0;
+                return false;
             }
-            if (setUpdating && _appCache.Cache.TryGetValue(id, out int id))
+            if (setUpdating && IsUpdating(id))
             {
-                return 0;
+                return false;
             }
-            var cacheEntryOptions = new MemoryCacheEntryOptions()
-            .SetSlidingExpiration(TimeSpan.FromSeconds(60));
+            if (setUpdating)
+            {
+                var cacheEntryOptions = new MemoryCacheEntryOptions().SetAbsoluteExpiration(TimeSpan.FromSeconds(60)).SetSize(1);
 
-            _memoryCache.Set(CacheKeys.Entry, cacheValue, cacheEntryOptions);
-            existingUser.BalanceUpdateStarted = setUpdating ? DateTime.Now : null;
-            return await _context.SaveChangesAsync();
+                _appCache.Cache.Set(id, DateTime.Now, cacheEntryOptions);
+
+                return true;
+            }
+
+            _appCache.Cache.Remove(id);
+
+            return true;
+        }
+
+        private bool IsUpdating(int id)
+        {
+            return _appCache.Cache.TryGetValue(id, out DateTime cacheResult);
         }
     }
 }

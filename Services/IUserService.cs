@@ -11,5 +11,6 @@ namespace BetAPI.Services
         Task<UserDTO?> GetUserAsync(int id);
         Task<int> InsertUserAsync(User bet);
         Task<int> UpdateUserAsync(int id, UserPutDTO user);
+        Task<int> UpdateBalance(int id, decimal change);
     }
 }

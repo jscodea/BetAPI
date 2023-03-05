@@ -90,5 +90,18 @@ namespace BetAPI.Controllers
             await _betService.BetPlaceAsync(bet);
             return NoContent();
         }
+
+        // PUT: api/Bets/DebugSettle/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("DebugSettle/{id}")]
+        public async Task<IActionResult> PutDebugSettle(int id, decimal payout)
+        {
+            bool result = await _betService.BetSettleAsync(id, payout);
+            if (!result)
+            {
+                return BadRequest();
+            }
+            return NoContent();
+        }
     }
 }

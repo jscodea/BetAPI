@@ -24,8 +24,5 @@ namespace BetAPI.Models
 
         [JsonIgnore]
         public virtual ICollection<Bet> Bets { get; set; }
-
-        [JsonIgnore]
-        public virtual DateTime? BalanceUpdateStarted { get; set; }
     }
 }

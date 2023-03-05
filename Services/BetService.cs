@@ -98,6 +98,35 @@ namespace BetAPI.Services
             return await _context.SaveChangesAsync();
         }
 
+        public async Task<bool> BetSettleAsync(int id, decimal payout)
+        {
+            if (payout < 0)
+            {
+                return false;
+            }
+            using var transaction = _context.Database.BeginTransaction();
+            try
+            {
+                Bet? bet = await _context.Bet.Include(p => p.User).Include(p => p.Event).FirstOrDefaultAsync(i => i.Id == id);
+                if (bet == null || bet.IsCompleted)
+                {
+                    throw new BetDoesNotExistException("Non completed bet does not exists for settling");
+                }
+                int balanceResult = await _userService.UpdateBalance(bet.UserId, payout);
+
+                bet.IsCompleted = true;
+                bet.Payout = payout;
+
+                await _context.SaveChangesAsync();
+                transaction.Commit();
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
+
         private decimal GetEventOdds(int Opt, decimal Opt1, decimal Opt2)
         {
             if (Opt == 1)

@@ -81,5 +81,18 @@ namespace BetAPI.Controllers
             await _userService.InsertUserAsync(user);
             return NoContent();
         }
+
+        // PUT: api/Users/DebugBalance/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("DebugBalance/{id}")]
+        public async Task<IActionResult> PutDebugBalance(int id, decimal change)
+        {
+            int result = await _userService.UpdateBalance(id, change);
+            if (result == 0)
+            {
+                return BadRequest();
+            }
+            return NoContent();
+        }
     }
 }

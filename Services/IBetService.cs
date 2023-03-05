@@ -14,5 +14,6 @@ namespace BetAPI.Services
         Task<int> InsertBetAsync(Bet bet);
         Task<int> UpdateBetAsync(int id, BetPutDTO bet);
         Task<int> BetPlaceAsync(BetPlaceDTO bet);
+        Task<bool> BetSettleAsync(int id, decimal payout);
     }
 }
