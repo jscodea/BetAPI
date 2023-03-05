@@ -64,7 +64,7 @@ namespace BetAPI.Services
             return await _context.SaveChangesAsync();
         }
 
-        public async Task<int> BetPlaceAsync(BetPlaceDTO bet)
+        public async Task<bool> BetPlaceAsync(BetPlaceDTO bet)
         {
             UserDTO? existingUser = await _userService.GetUserAsync(bet.UserId);
             if (existingUser == null || existingUser.IsActive == false)
@@ -75,8 +75,12 @@ namespace BetAPI.Services
             {
                 throw new BalanceTooLowException("Not enough balance for this operation");
             }
+            if (bet.Stake <= 0)
+            {
+                throw new MalformedDataException("Stake must be greater than 0");
+            }
             EventDTO? existingEvent = await _eventService.GetEventAsync(bet.EventId);
-            if (existingEvent == null || existingEvent.StartsAt > DateTime.Now)
+            if (existingEvent == null || (existingEvent.BetsAllowedFrom < DateTime.Now && existingEvent.StartsAt > DateTime.Now))
             {
                 throw new EventUnavailableException("Event not found or already started");
             }
@@ -94,8 +98,25 @@ namespace BetAPI.Services
                 UserId = bet.UserId,
                 EventId = bet.EventId
             };
-            await _context.Bet.AddAsync(newBet);
-            return await _context.SaveChangesAsync();
+
+            using var transaction = _context.Database.BeginTransaction();
+            try
+            {
+                int balanceResult = await _userService.UpdateBalance(bet.UserId, -bet.Stake);
+
+                if (balanceResult == 0)
+                {
+                    throw new BalanceNotUpdatedException("Balance not updated when placing bet");
+                }
+                await _context.Bet.AddAsync(newBet);
+                await _context.SaveChangesAsync();
+                transaction.Commit();
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
         }
 
         public async Task<bool> BetSettleAsync(int id, decimal payout)
@@ -113,6 +134,11 @@ namespace BetAPI.Services
                     throw new BetDoesNotExistException("Non completed bet does not exists for settling");
                 }
                 int balanceResult = await _userService.UpdateBalance(bet.UserId, payout);
+
+                if(balanceResult == 0)
+                {
+                    throw new BalanceNotUpdatedException("Balance not updated when settling bet");
+                }
 
                 bet.IsCompleted = true;
                 bet.Payout = payout;

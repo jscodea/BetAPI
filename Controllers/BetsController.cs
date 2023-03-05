@@ -87,7 +87,10 @@ namespace BetAPI.Controllers
         [HttpPost("Place")]
         public async Task<IActionResult> PostBetPlace(BetPlaceDTO bet)
         {
-            await _betService.BetPlaceAsync(bet);
+            if (!await _betService.BetPlaceAsync(bet))
+            {
+                return BadRequest();
+            }
             return NoContent();
         }
 
