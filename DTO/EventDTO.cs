@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using BetAPI.Models;
+using NuGet.Packaging.Signing;
+using System.ComponentModel.DataAnnotations;
 
 namespace BetAPI.DTO
 {
@@ -14,5 +16,18 @@ namespace BetAPI.DTO
 
         public DateTime StartsAt { get; set; }
         public DateTime EndsAt { get; set; }
+
+        public EventDTO SetFromEvent(Event ev)
+        {
+            Id = ev.Id;
+            Name = ev.Name;
+            Opt1 = ev.Opt1;
+            Opt2 = ev.Opt2;
+            BetsAllowedFrom = ev.BetsAllowedFrom;
+            StartsAt = ev.StartsAt;
+            EndsAt = ev.EndsAt;
+
+            return this;
+        }
     }
 }

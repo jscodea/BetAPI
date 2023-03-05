@@ -9,6 +9,9 @@ using BetAPI.Data;
 using BetAPI.Models;
 using BetAPI.DTO;
 using BetAPI.Services;
+using PagedList;
+using Microsoft.CodeAnalysis;
+using Newtonsoft.Json;
 
 namespace BetAPI.Controllers
 {
@@ -16,20 +19,31 @@ namespace BetAPI.Controllers
     [ApiController]
     public class BetsController : ControllerBase
     {
-        private readonly BetAPIContext _context;
         private readonly IBetService _betService;
 
-        public BetsController(BetAPIContext context, IBetService betService)
+        public BetsController(IBetService betService)
         {
-            _context = context;
             _betService = betService;
         }
 
         // GET: api/Bets
         [HttpGet]
-        public async Task<ActionResult<List<BetDTO>>> GetBet()
+        public async Task<IPagedList<BetDTO>> GetBet([FromQuery]PagingParameters pagingParams)
         {
-            return await _betService.GetBetsAsync();
+            IPagedList<BetDTO> bets = await _betService.GetBetsPagedAsync(pagingParams.PageNumber, pagingParams.PageSize);
+
+            PagingMetadata metadata = new PagingMetadata
+            {
+                Count = bets.Count,
+                PageSize = bets.PageSize,
+                PageNumber = bets.PageNumber,
+                PageCount = bets.PageCount,
+                HasNextPage = bets.HasNextPage,
+                HasPreviousPage = bets.HasPreviousPage
+            };
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+
+            return bets;
         }
 
         // GET: api/Bets/5
@@ -49,31 +63,13 @@ namespace BetAPI.Controllers
         // PUT: api/Bets/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBet(int id, Bet bet)
+        public async Task<IActionResult> PutBet(int id, BetPutDTO bet)
         {
-            if (id != bet.Id)
+            int status = await _betService.UpdateBetAsync(id, bet);
+            if (status == 0)
             {
-                return BadRequest();
+                return NotFound();
             }
-
-            _context.Entry(bet).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!BetExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
             return NoContent();
         }
 
@@ -86,29 +82,13 @@ namespace BetAPI.Controllers
             return NoContent();
         }
 
-        // DELETE: api/Bets/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBet(int id)
+        // POST: api/BetsPlace
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost("Place")]
+        public async Task<IActionResult> PostBetPlace(BetPlaceDTO bet)
         {
-            if (_context.Bet == null)
-            {
-                return NotFound();
-            }
-            var bet = await _context.Bet.FindAsync(id);
-            if (bet == null)
-            {
-                return NotFound();
-            }
-
-            _context.Bet.Remove(bet);
-            await _context.SaveChangesAsync();
-
+            await _betService.BetPlaceAsync(bet);
             return NoContent();
-        }
-
-        private bool BetExists(int id)
-        {
-            return (_context.Bet?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

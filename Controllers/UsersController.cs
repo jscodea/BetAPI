@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BetAPI.Data;
 using BetAPI.Models;
+using BetAPI.DTO;
+using BetAPI.Services;
+using Newtonsoft.Json;
+using PagedList;
 
 namespace BetAPI.Controllers
 {
@@ -14,33 +18,39 @@ namespace BetAPI.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly BetAPIContext _context;
+        private readonly IUserService _userService;
 
-        public UsersController(BetAPIContext context)
+        public UsersController(IUserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
 
         // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUser()
+        public async Task<IPagedList<UserDTO>> GetUser([FromQuery]PagingParameters pagingParams)
         {
-          if (_context.User == null)
-          {
-              return NotFound();
-          }
-            return await _context.User.ToListAsync();
+            IPagedList<UserDTO> users = await _userService.GetUsersPagedAsync(pagingParams.PageNumber, pagingParams.PageSize);
+
+            PagingMetadata metadata = new PagingMetadata
+            {
+                Count = users.Count,
+                PageSize = users.PageSize,
+                PageNumber = users.PageNumber,
+                PageCount = users.PageCount,
+                HasNextPage = users.HasNextPage,
+                HasPreviousPage = users.HasPreviousPage
+            };
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+
+            return users;
         }
+
 
         // GET: api/Users/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
+        public async Task<ActionResult<UserDTO>> GetUser(int id)
         {
-          if (_context.User == null)
-          {
-              return NotFound();
-          }
-            var user = await _context.User.FindAsync(id);
+            var user = await _userService.GetUserAsync(id);
 
             if (user == null)
             {
@@ -53,72 +63,23 @@ namespace BetAPI.Controllers
         // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User user)
+        public async Task<IActionResult> PutUser(int id, UserPutDTO user)
         {
-            if (id != user.Id)
+            int status = await _userService.UpdateUserAsync(id, user);
+            if (status == 0)
             {
-                return BadRequest();
+                return NotFound();
             }
-
-            _context.Entry(user).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
             return NoContent();
         }
 
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
+        public async Task<IActionResult> PostUser(User user)
         {
-          if (_context.User == null)
-          {
-              return Problem("Entity set 'BetAPIContext.User'  is null.");
-          }
-            _context.User.Add(user);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetUser", new { id = user.Id }, user);
-        }
-
-        // DELETE: api/Users/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
-        {
-            if (_context.User == null)
-            {
-                return NotFound();
-            }
-            var user = await _context.User.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            _context.User.Remove(user);
-            await _context.SaveChangesAsync();
-
+            await _userService.InsertUserAsync(user);
             return NoContent();
-        }
-
-        private bool UserExists(int id)
-        {
-            return (_context.User?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

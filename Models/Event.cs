@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace BetAPI.Models
 {
@@ -29,7 +30,7 @@ namespace BetAPI.Models
 
         [DataType(DataType.Date)]
         public DateTime EndsAt { get; set; }
-
+        [JsonIgnore]
         public virtual ICollection<Bet> Bets { get; set; }
     }
 }

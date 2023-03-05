@@ -19,6 +19,9 @@ namespace BetAPI
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddSingleton<IAppCache, AppCache>();
+            builder.Services.AddTransient<IUserService, UserService>();
+            builder.Services.AddTransient<IEventService, EventService>();
             builder.Services.AddTransient<IBetService, BetService>();
 
             var app = builder.Build();
@@ -27,7 +30,7 @@ namespace BetAPI
             {
                 var services = scope.ServiceProvider;
 
-                SeedData.Initialize(services);
+                SeedData.Initialize(services, builder.Configuration.GetValue<bool>("FreshSeed"));
             }
 
             // Configure the HTTP request pipeline.

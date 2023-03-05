@@ -1,4 +1,5 @@
 ﻿using BetAPI.Models;
+using NuGet.Packaging.Signing;
 using System.ComponentModel.DataAnnotations;
 
 namespace BetAPI.DTO
@@ -20,6 +21,17 @@ namespace BetAPI.DTO
 
         public decimal Balance { get; set; }
 
-        public List<int> BetIds { get; set; }
+        public IEnumerable<int> BetIds { get; set; }
+
+        public UserDTO SetFromUser(User user)
+        {
+            Id = user.Id;
+            IsActive = user.IsActive;
+            FirstName = user.FirstName;
+            LastName = user.LastName;
+            Balance = user.Balance;
+            BetIds = user.Bets.Select(s => s.Id);
+            return this;
+        }
     }
 }

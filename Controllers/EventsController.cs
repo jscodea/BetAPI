@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BetAPI.Data;
 using BetAPI.Models;
+using BetAPI.DTO;
+using BetAPI.Services;
+using Newtonsoft.Json;
+using PagedList;
 
 namespace BetAPI.Controllers
 {
@@ -14,111 +18,67 @@ namespace BetAPI.Controllers
     [ApiController]
     public class EventsController : ControllerBase
     {
-        private readonly BetAPIContext _context;
+        private readonly IEventService _eventService;
 
-        public EventsController(BetAPIContext context)
+        public EventsController(IEventService eventService)
         {
-            _context = context;
+            _eventService = eventService;
         }
 
         // GET: api/Events
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Event>>> GetEvent()
+        public async Task<IPagedList<EventDTO>> GetEvent([FromQuery]PagingParameters pagingParams)
         {
-          if (_context.Event == null)
-          {
-              return NotFound();
-          }
-            return await _context.Event.ToListAsync();
+            IPagedList<EventDTO> events = await _eventService.GetEventsPagedAsync(pagingParams.PageNumber, pagingParams.PageSize);
+
+            PagingMetadata metadata = new PagingMetadata
+            {
+                Count = events.Count,
+                PageSize = events.PageSize,
+                PageNumber = events.PageNumber,
+                PageCount = events.PageCount,
+                HasNextPage = events.HasNextPage,
+                HasPreviousPage = events.HasPreviousPage
+            };
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+
+            return events;
         }
 
         // GET: api/Events/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Event>> GetEvent(int id)
+        public async Task<ActionResult<EventDTO>> GetEvent(int id)
         {
-          if (_context.Event == null)
-          {
-              return NotFound();
-          }
-            var @event = await _context.Event.FindAsync(id);
+            var ev = await _eventService.GetEventAsync(id);
 
-            if (@event == null)
+            if (ev == null)
             {
                 return NotFound();
             }
 
-            return @event;
+            return ev;
         }
 
         // PUT: api/Events/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutEvent(int id, Event @event)
+        public async Task<IActionResult> PutEvent(int id, EventPutDTO ev)
         {
-            if (id != @event.Id)
+            int status = await _eventService.UpdateEventAsync(id, ev);
+            if (status == 0)
             {
-                return BadRequest();
+                return NotFound();
             }
-
-            _context.Entry(@event).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!EventExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
             return NoContent();
         }
 
         // POST: api/Events
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Event>> PostEvent(Event @event)
+        public async Task<IActionResult> PostBet(Event ev)
         {
-          if (_context.Event == null)
-          {
-              return Problem("Entity set 'BetAPIContext.Event'  is null.");
-          }
-            _context.Event.Add(@event);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetEvent", new { id = @event.Id }, @event);
-        }
-
-        // DELETE: api/Events/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteEvent(int id)
-        {
-            if (_context.Event == null)
-            {
-                return NotFound();
-            }
-            var @event = await _context.Event.FindAsync(id);
-            if (@event == null)
-            {
-                return NotFound();
-            }
-
-            _context.Event.Remove(@event);
-            await _context.SaveChangesAsync();
-
+            await _eventService.InsertEventAsync(ev);
             return NoContent();
-        }
-
-        private bool EventExists(int id)
-        {
-            return (_context.Event?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

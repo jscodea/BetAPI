@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using static System.Reflection.Metadata.BlobBuilder;
+using System.Text.Json.Serialization;
 
 namespace BetAPI.Models
 {
@@ -22,6 +22,10 @@ namespace BetAPI.Models
         [Range(0, 9999999999999999.99)]
         public decimal Balance { get; set; }
 
+        [JsonIgnore]
         public virtual ICollection<Bet> Bets { get; set; }
+
+        [JsonIgnore]
+        public virtual DateTime? BalanceUpdateStarted { get; set; }
     }
 }
