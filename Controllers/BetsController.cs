@@ -9,6 +9,7 @@ using BetAPI.Data;
 using BetAPI.Models;
 using BetAPI.DTO;
 using BetAPI.Services;
+using BetAPI.Filters;
 using PagedList;
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
@@ -16,6 +17,7 @@ using Newtonsoft.Json;
 namespace BetAPI.Controllers
 {
     [Route("api/[controller]")]
+    [RenderableExceptionFilter]
     [ApiController]
     public class BetsController : ControllerBase
     {

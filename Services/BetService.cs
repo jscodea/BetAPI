@@ -88,16 +88,8 @@ namespace BetAPI.Services
             {
                 throw new OddsChangedException("Odds have already changed");
             }
-            Bet newBet = new Bet
-            {
-                IsCompleted = false,
-                Opt = bet.Opt,
-                Stake = bet.Stake,
-                Payout = 0.00m,
-                Odds = bet.Odds,
-                UserId = bet.UserId,
-                EventId = bet.EventId
-            };
+
+            Bet newBet = bet.ConvertToModel();
 
             using var transaction = _context.Database.BeginTransaction();
             try
