@@ -3,30 +3,23 @@ using System.Text.Json;
 
 namespace BetAPI.Exceptions
 {
-    [Serializable]
-    public class BaseAPIException : Exception
+    public abstract class BaseAPIException : Exception
     {
-        internal int RenderCode = -1;
-        internal string RenderMessage = "Generic error";
-        internal int HTTPCode = 500;
-        public BaseAPIException() { }
-
-        public BaseAPIException(string message)
-            : base(message) { }
-
-        public BaseAPIException(string message, Exception inner)
-            : base(message, inner) { }
-
+        public abstract int RenderCode { get; }
+        public abstract string RenderMessage { get; set; }
+        public abstract int HTTPCode { get; }
+        public BaseAPIException(string message, string customMessage) : base(message)
+        {
+            RenderMessage = customMessage;
+        }
         public string GetRenderJSON()
         {
             return JsonSerializer.Serialize(GetRenderObj());
         }
-
         public int GetHttpCode()
         {
             return HTTPCode;
         }
-
         public APIExceptionDTO GetRenderObj()
         {
             return new APIExceptionDTO

@@ -1,18 +1,24 @@
 ﻿namespace BetAPI.Exceptions
 {
-    [Serializable]
     public class BalanceTooLowException : BaseAPIException
     {
-        public BalanceTooLowException() { }
-
-        public BalanceTooLowException(string message)
-            : base(message) {
-            RenderCode = 1;
-            RenderMessage = "Balance is too low";
-            HTTPCode = 400;
+        public BalanceTooLowException(
+            string internalMessage,
+            string customMessage = "Balance is too low"
+        ) : base(internalMessage, customMessage)
+        {
+            RenderMessage = customMessage;
         }
+        public override int RenderCode { get { return 2; } }
 
-        public BalanceTooLowException(string message, Exception inner)
-            : base(message, inner) { }
+        public override string RenderMessage
+        {
+            get { return RenderMessage; }
+            set
+            {
+                RenderMessage = value;
+            }
+        }
+        public override int HTTPCode { get { return 400; } }
     }
 }

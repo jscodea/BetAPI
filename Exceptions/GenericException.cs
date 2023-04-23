@@ -1,15 +1,15 @@
 ﻿namespace BetAPI.Exceptions
 {
-    public class OddsChangedException : BaseAPIException
+    public class GenericException : BaseAPIException
     {
-        public OddsChangedException(
+        public GenericException(
             string internalMessage,
-            string customMessage = "Odds have changed"
+            string customMessage = "Unknown error"
         ) : base(internalMessage, customMessage)
         {
             RenderMessage = customMessage;
         }
-        public override int RenderCode { get { return 6; } }
+        public override int RenderCode { get { return -1; } }
 
         public override string RenderMessage
         {
@@ -19,6 +19,6 @@
                 RenderMessage = value;
             }
         }
-        public override int HTTPCode { get { return 400; } }
+        public override int HTTPCode { get { return 500; } }
     }
 }

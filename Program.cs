@@ -23,6 +23,9 @@ namespace BetAPI
             builder.Services.AddTransient<IUserService, UserService>();
             builder.Services.AddTransient<IEventService, EventService>();
             builder.Services.AddTransient<IBetService, BetService>();
+            builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
+            builder.Services.AddHostedService<ConsumeScopedServiceHostedService>();
+            builder.Services.AddScoped<IBackgroundConsumerService, BackgroundResultsConsumerService>();
 
             var app = builder.Build();
 

@@ -1,18 +1,24 @@
 ﻿namespace BetAPI.Exceptions
 {
-    [Serializable]
     public class EventUnavailableException : BaseAPIException
     {
-        public EventUnavailableException() { }
-
-        public EventUnavailableException(string message)
-            : base(message) {
-            RenderCode = 4;
-            RenderMessage = "Event is not available.";
-            HTTPCode = 400;
+        public EventUnavailableException(
+            string internalMessage,
+            string customMessage = "Event is not available"
+        ) : base(internalMessage, customMessage)
+        {
+            RenderMessage = customMessage;
         }
+        public override int RenderCode { get { return 4; } }
 
-        public EventUnavailableException(string message, Exception inner)
-            : base(message, inner) { }
+        public override string RenderMessage
+        {
+            get { return RenderMessage; }
+            set
+            {
+                RenderMessage = value;
+            }
+        }
+        public override int HTTPCode { get { return 400; } }
     }
 }

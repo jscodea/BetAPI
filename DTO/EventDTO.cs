@@ -12,6 +12,8 @@ namespace BetAPI.DTO
         public decimal Opt1 { get; set; }
         public decimal Opt2 { get; set; }
 
+        public int? Result { get; set; }
+
         public DateTime BetsAllowedFrom { get; set; }
 
         public DateTime StartsAt { get; set; }
@@ -23,6 +25,7 @@ namespace BetAPI.DTO
             Name = ev.Name;
             Opt1 = ev.Opt1;
             Opt2 = ev.Opt2;
+            Result = ev.Result;
             BetsAllowedFrom = ev.BetsAllowedFrom;
             StartsAt = ev.StartsAt;
             EndsAt = ev.EndsAt;

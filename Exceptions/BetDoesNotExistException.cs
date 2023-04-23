@@ -1,27 +1,31 @@
 ﻿namespace BetAPI.Exceptions
 {
-    [Serializable]
     public class BetDoesNotExistException : BaseAPIException
     {
 
-        public BetDoesNotExistException() {
-            RenderCode = 3;
-            RenderMessage = "Bet does not exist";
-            HTTPCode = 404;
+        /// <summary>
+        ///This error requires error message.
+        ///Inherits <see cref="BaseAPIException"/>
+        ///</summary>
+        ///<param name="message"> This is a message</param>
+        ///<returns>Returns error</returns>
+        public BetDoesNotExistException(
+            string internalMessage,
+            string customMessage = "Bet does not exist"
+        ) : base(internalMessage, customMessage)
+        {
+            RenderMessage = customMessage;
         }
+        public override int RenderCode { get { return 3; } }
 
-        public BetDoesNotExistException(string message)
-            : base(message) {
-            RenderCode = 3;
-            RenderMessage = "Bet does not exist";
-            HTTPCode = 404;
+        public override string RenderMessage
+        {
+            get { return RenderMessage; }
+            set
+            {
+                RenderMessage = value;
+            }
         }
-
-        public BetDoesNotExistException(string message, Exception inner)
-            : base(message, inner) {
-            RenderCode = 3;
-            RenderMessage = "Bet does not exist";
-            HTTPCode = 404;
-        }
+        public override int HTTPCode { get { return 404; } }
     }
 }

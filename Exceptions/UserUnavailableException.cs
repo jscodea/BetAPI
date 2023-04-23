@@ -1,18 +1,24 @@
 ﻿namespace BetAPI.Exceptions
 {
-    [Serializable]
     public class UserUnavailableException : BaseAPIException {
 
-        public UserUnavailableException() { }
-
-        public UserUnavailableException(string message)
-            : base(message) {
-            RenderCode = 7;
-            RenderMessage  = "User is not available";
-            HTTPCode = 400;
+        public UserUnavailableException(
+            string internalMessage,
+            string customMessage = "User is not available"
+        ) : base(internalMessage, customMessage)
+        {
+            RenderMessage = customMessage;
         }
+        public override int RenderCode { get { return 7; } }
 
-        public UserUnavailableException(string message, Exception inner)
-            : base(message, inner) { }
+        public override string RenderMessage
+        {
+            get { return RenderMessage; }
+            set
+            {
+                RenderMessage = value;
+            }
+        }
+        public override int HTTPCode { get { return 400; } }
     }
 }

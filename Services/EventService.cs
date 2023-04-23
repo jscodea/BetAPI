@@ -2,6 +2,7 @@
 using BetAPI.DTO;
 using BetAPI.Generics;
 using BetAPI.Models;
+using BetAPI.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using PagedList;
 
@@ -62,6 +63,17 @@ namespace BetAPI.Services
             {
                 existingEvent.Opt2 = (decimal) ev.Opt2;
             }
+            return await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> SetEventResult(int id, int Result)
+        {
+            Event? existingEvent = await _context.Event.FirstOrDefaultAsync(i => i.Id == id);
+            if (existingEvent == null)
+            {
+                throw new EventUnavailableException("Event does not exist for resulting.");
+            }
+            existingEvent.Result = Result;
             return await _context.SaveChangesAsync();
         }
     }

@@ -17,7 +17,7 @@ namespace BetAPI.Filters
                 };
             } else
             {
-                var baseException = new BaseAPIException("Uncaught unknown error");
+                var baseException = new GenericException("Uncaught unknown error");
                 //Converting all exceptions to base exception
                 context.Result = new JsonResult(baseException.GetRenderObj())
                 {

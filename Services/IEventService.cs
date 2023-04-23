@@ -11,5 +11,7 @@ namespace BetAPI.Services
         Task<EventDTO?> GetEventAsync(int id);
         Task<int> InsertEventAsync(Event ev);
         Task<int> UpdateEventAsync(int id, EventPutDTO ev);
+
+        Task<int> SetEventResult(int id, int Result);
     }
 }

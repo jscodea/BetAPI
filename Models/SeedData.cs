@@ -1,4 +1,5 @@
 ﻿using BetAPI.Data;
+using BetAPI.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 using System;
@@ -46,6 +47,7 @@ namespace BetAPI.Models
                         Name = $"{firstParticipant} - {secondParticipant}",
                         Opt1 = rOpt1,
                         Opt2 = rOpt2,
+                        Result = null,
                         BetsAllowedFrom = DateTime.Now,
                         StartsAt = DateTime.Now.AddMinutes(EventStartsAfterMins),
                         EndsAt = DateTime.Now.AddMinutes(EventStartsAfterMins + r.Next(5, 15)),
@@ -57,9 +59,18 @@ namespace BetAPI.Models
                     {
                         PreviousEvent = SomeEvent;
                     }
-                    context.SaveChanges();
+                    context.SaveChanges();   
+
                     for (int x = 0; x < 10; x++)
                     {
+                        string password = NextString(r, r.Next(3, 12));
+                        string username = NextString(r, r.Next(3, 12));
+                        if (x == 0)
+                        {
+                            password = "test";
+                            username = "test";
+                        }
+                        string hashedPassword = PasswordHelper.HashPasword(password, out var salt);
                         string firstName = NextString(r, r.Next(3, 12));
                         string lastName = NextString(r, r.Next(3, 12));
                         User SomeUser = new User
@@ -67,6 +78,9 @@ namespace BetAPI.Models
                             FirstName = firstName,
                             LastName = lastName,
                             IsActive = true,
+                            Salt = salt,
+                            Username = username,
+                            Password = hashedPassword,
                             Balance = (decimal)NextDouble(r, 0, 10000.00, 2),
                             CreatedAt = DateTime.Now,
                             UpdatedAt = DateTime.Now,

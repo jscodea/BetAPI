@@ -1,18 +1,24 @@
 ﻿namespace BetAPI.Exceptions
 {
-    [Serializable]
     public class MalformedDataException : BaseAPIException
     {
-        public MalformedDataException() { }
-
-        public MalformedDataException(string message)
-            : base(message) {
-            RenderCode = 5;
-            RenderMessage = "Data is malformed";
-            HTTPCode = 400;
+        public MalformedDataException(
+            string internalMessage,
+            string customMessage = "Data is malformed"
+        ) : base(internalMessage, customMessage)
+        {
+            RenderMessage = customMessage;
         }
+        public override int RenderCode { get { return 5; } }
 
-        public MalformedDataException(string message, Exception inner)
-            : base(message, inner) { }
+        public override string RenderMessage
+        {
+            get { return RenderMessage; }
+            set
+            {
+                RenderMessage = value;
+            }
+        }
+        public override int HTTPCode { get { return 400; } }
     }
 }

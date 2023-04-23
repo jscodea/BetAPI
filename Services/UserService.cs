@@ -1,7 +1,9 @@
 ﻿using BetAPI.Data;
 using BetAPI.DTO;
 using BetAPI.Generics;
+using BetAPI.Helpers;
 using BetAPI.Models;
+using BetAPI.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using PagedList;
@@ -44,6 +46,11 @@ namespace BetAPI.Services
             return user != null ? new UserDTO().SetFromUser(user) : null;
         }
 
+        public async Task<User?> GetUserByUsernameAsync(string username)
+        {
+            return await _context.User.Include(p => p.Bets).FirstOrDefaultAsync(i => i.Username == username);
+        }
+
         public async Task<int> InsertUserAsync(User user)
         {
             await _context.User.AddAsync(user);
@@ -68,6 +75,23 @@ namespace BetAPI.Services
             return await _context.SaveChangesAsync();
         }
 
+        public async Task<int> RegisterUser(string Username, string Password, string Firstname, string Lastname)
+        {
+            string HashedPassword = PasswordHelper.HashPasword(Password, out var salt);
+            User user = new User
+            {
+                Username = Username,
+                Password = HashedPassword,
+                FirstName = Firstname,
+                LastName = Lastname,
+                Salt = salt,
+                IsActive = true,
+                Balance = 0
+            };
+            await _context.User.AddAsync(user);
+            return await _context.SaveChangesAsync();
+        }
+
         public async Task<int> UpdateBalance(int id, decimal change)
         {
             User? existingUser = await _context.User.FirstOrDefaultAsync(i => i.Id == id);
@@ -77,10 +101,9 @@ namespace BetAPI.Services
             }
 
             bool updateSet = await SetBalanceUpdate(id, true);
-            //TODO probably should think about throwing exceptions etc. not informative
             if (!updateSet)
             {
-                return 0;
+                throw new GenericException("Balance is already being updated.");
             }
 
             existingUser.Balance = existingUser.Balance + change;
