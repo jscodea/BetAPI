@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace BetAPI.Models
 {
-    public class Bet: BaseEntity
+    public class Bet: AbstractEntity
     {
         [JsonIgnore]
         public int Id { get; set; }

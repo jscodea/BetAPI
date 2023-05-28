@@ -27,8 +27,7 @@ namespace BetAPI.Services
             var consumerBuilder = new ConsumerBuilder<Ignore, string>(config).Build();
             consumerBuilder.Subscribe(topic);
 
-            _logger.LogInformation(
-                    "Consumer started");
+            _logger.LogInformation("Consumer started");
 
             while (!stoppingToken.IsCancellationRequested)
             {

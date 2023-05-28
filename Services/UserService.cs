@@ -7,72 +7,51 @@ using BetAPI.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using PagedList;
+using BetAPI.Repositories;
 
 namespace BetAPI.Services
 {
     public class UserService : IUserService
     {
-        private readonly BetAPIContext _context;
+        private readonly IUserRepository _repository;
         private readonly IAppCache _appCache;
 
-        public UserService(BetAPIContext context, IAppCache appCache)
+        public UserService(IUserRepository repository, IAppCache appCache)
         {
-            _context = context;
+            _repository = repository;
             _appCache = appCache;
         }
 
         public async Task<List<UserDTO>> GetUsersAsync()
         {
-            List<UserDTO> users = await _context.User.Include(p => p.Bets).Select(
-                  s => new UserDTO().SetFromUser(s)
-              ).ToListAsync();
-
-            return users;
+            return await _repository.GetAllWithInfoAsync();
         }
 
         public async Task<IPagedList<UserDTO>> GetUsersPagedAsync(int pageNumber, int pageSize = 50)
         {
-            IPagedList<UserDTO> usersPaged = await PagedListExtendedExtensions.ToPagedListAsync<UserDTO>(_context.User.Include(p => p.Bets).Select(
-                  s => new UserDTO().SetFromUser(s)
-              ), pageNumber, pageSize);
-
-            return usersPaged;
+            return await _repository.GetAllPagedWithInfoAsync(pageNumber, pageSize);
         }
 
         public async Task<UserDTO?> GetUserAsync(int id)
         {
-            User? user = await _context.User.Include(p => p.Bets).FirstOrDefaultAsync(i => i.Id == id);
-
-            return user != null ? new UserDTO().SetFromUser(user) : null;
+            return await _repository.GetByIdWithInfoAsync(id);
         }
 
         public async Task<User?> GetUserByUsernameAsync(string username)
         {
-            return await _context.User.Include(p => p.Bets).FirstOrDefaultAsync(i => i.Username == username);
+            return await _repository.GetUserByUsernameAsync(username);
         }
 
         public async Task<int> InsertUserAsync(User user)
         {
-            await _context.User.AddAsync(user);
-            return await _context.SaveChangesAsync();
+            await _repository.InsertAsync(user);
+            return await _repository.SaveAsync();
         }
 
         public async Task<int> UpdateUserAsync(int id, UserPutDTO user)
         {
-            User? existingUser = await _context.User.FirstOrDefaultAsync(i => i.Id == id);
-            if (existingUser == null)
-            {
-                return 0;
-            }
-            if (user.IsActive != null)
-            {
-                existingUser.IsActive = (bool) user.IsActive;
-            }
-            if (user.Balance != null)
-            {
-                existingUser.Balance = (decimal) user.Balance;
-            }
-            return await _context.SaveChangesAsync();
+            await _repository.UpdateFromDTOAsync(id, user);
+            return await _repository.SaveAsync();
         }
 
         public async Task<int> RegisterUser(string Username, string Password, string Firstname, string Lastname)
@@ -88,13 +67,13 @@ namespace BetAPI.Services
                 IsActive = true,
                 Balance = 0
             };
-            await _context.User.AddAsync(user);
-            return await _context.SaveChangesAsync();
+            await _repository.InsertAsync(user);
+            return await _repository.SaveAsync();
         }
 
         public async Task<int> UpdateBalance(int id, decimal change)
         {
-            User? existingUser = await _context.User.FirstOrDefaultAsync(i => i.Id == id);
+            User? existingUser = await _repository.GetByIdAsync(id);
             if (existingUser == null || IsUpdating(id))
             {
                 return 0;
@@ -108,7 +87,7 @@ namespace BetAPI.Services
 
             existingUser.Balance = existingUser.Balance + change;
 
-            int balanceUpdated = await _context.SaveChangesAsync();
+            int balanceUpdated = await _repository.SaveAsync();
 
             await SetBalanceUpdate(id, false);
 
@@ -117,7 +96,7 @@ namespace BetAPI.Services
 
         private async Task<bool> SetBalanceUpdate(int id, bool setUpdating)
         {
-            User? existingUser = await _context.User.FirstOrDefaultAsync(i => i.Id == id);
+            User? existingUser = await _repository.GetByIdAsync(id);
             if (existingUser == null)
             {
                 return false;

@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 namespace BetAPI.Models
 {
     [Index(nameof(Username), IsUnique = true)]
-    public class User: BaseEntity
+    public class User: AbstractEntity
     {
         public User()
         {

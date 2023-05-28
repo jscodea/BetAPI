@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace BetAPI.Models
 {
-    public class Event: BaseEntity
+    public class Event: AbstractEntity
     {
         public Event()
         {

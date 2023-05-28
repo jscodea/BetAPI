@@ -5,63 +5,48 @@ using BetAPI.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using BetAPI.Generics;
 using PagedList;
+using BetAPI.Repositories;
 
 namespace BetAPI.Services
 {
     public class BetService: IBetService
     {
-        private readonly BetAPIContext _context;
+        private readonly IBetRepository _repository;
         private readonly IEventService _eventService;
         private readonly IUserService _userService;
 
-        public BetService(BetAPIContext context, IEventService eventService, IUserService userService)
+        public BetService(IBetRepository repository, IEventService eventService, IUserService userService)
         {
-            _context = context;
+            _repository = repository;
             _eventService = eventService;
             _userService = userService;
         }
 
         public async Task<List<BetDTO>> GetBetsAsync()
         {
-            List<BetDTO> bets = await _context.Bet.Include(p => p.User).Include(p => p.Event).Select(
-                  s => new BetDTO().SetFromBet(s)
-              ).ToListAsync();
-
-            return bets;
+            return await _repository.GetAllWithInfoAsync();
         }
 
         public async Task<IPagedList<BetDTO>> GetBetsPagedAsync(int pageNumber, int pageSize = 50)
         {
-            IPagedList<BetDTO> betsPaged = await PagedListExtendedExtensions.ToPagedListAsync<BetDTO>(_context.Bet.Include(p => p.User).Include(p => p.Event).Select(
-                  s => new BetDTO().SetFromBet(s)
-              ), pageNumber, pageSize);
-
-            return betsPaged;
+            return await _repository.GetAllPagedWithInfoAsync(pageNumber, pageSize);
         }
 
         public async Task<BetDTO?> GetBetAsync(int id)
         {
-            Bet? bet = await _context.Bet.Include(p => p.User).Include(p => p.Event).FirstOrDefaultAsync(i => i.Id == id);
-
-            return bet != null ? new BetDTO().SetFromBet(bet) : null;
+            return await _repository.GetByIdWithInfoAsync(id);
         }
 
         public async Task<int> InsertBetAsync(Bet bet)
         {
-            await _context.Bet.AddAsync(bet);
-            return await _context.SaveChangesAsync();
+            await _repository.InsertAsync(bet);
+            return await _repository.SaveAsync();
         }
 
-            public async Task<int> UpdateBetAsync(int id, BetPutDTO bet)
+        public async Task<int> UpdateBetAsync(int id, BetPutDTO bet)
         {
-            Bet? existingBet = await _context.Bet.FirstOrDefaultAsync(i => i.Id == id);
-            if (existingBet == null)
-            {
-                return 0;
-            }
-            existingBet.IsCompleted = bet.IsCompleted;
-            existingBet.Payout = bet.Payout;
-            return await _context.SaveChangesAsync();
+            await _repository.UpdateFromDTOAsync(id, bet);
+            return await _repository.SaveAsync();
         }
 
         public async Task<bool> BetPlaceAsync(BetPlaceDTO bet)
@@ -91,7 +76,7 @@ namespace BetAPI.Services
 
             Bet newBet = bet.ConvertToModel();
 
-            using var transaction = _context.Database.BeginTransaction();
+            using var transaction = _repository.StartTransaction();
             try
             {
                 int balanceResult = await _userService.UpdateBalance(bet.UserId, -bet.Stake);
@@ -100,8 +85,8 @@ namespace BetAPI.Services
                 {
                     throw new BalanceNotUpdatedException("Balance not updated when placing bet");
                 }
-                await _context.Bet.AddAsync(newBet);
-                await _context.SaveChangesAsync();
+                await _repository.InsertAsync(newBet);
+                await _repository.SaveAsync();
                 transaction.Commit();
             }
             catch (Exception)
@@ -117,10 +102,10 @@ namespace BetAPI.Services
             {
                 return false;
             }
-            using var transaction = _context.Database.BeginTransaction();
+            using var transaction = _repository.StartTransaction();
             try
             {
-                Bet? bet = await _context.Bet.Include(p => p.User).Include(p => p.Event).FirstOrDefaultAsync(i => i.Id == id);
+                Bet? bet = await _repository.GetByIdAsync(id);
                 if (bet == null || bet.IsCompleted)
                 {
                     throw new BetDoesNotExistException("Non completed bet does not exists for settling");
@@ -135,7 +120,7 @@ namespace BetAPI.Services
                 bet.IsCompleted = true;
                 bet.Payout = payout;
 
-                await _context.SaveChangesAsync();
+                await _repository.SaveAsync();
                 transaction.Commit();
             }
             catch (Exception)

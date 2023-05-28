@@ -2,6 +2,7 @@
 using BetAPI.Data;
 using BetAPI.Models;
 using BetAPI.Services;
+using BetAPI.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace BetAPI
@@ -23,6 +24,9 @@ namespace BetAPI
             builder.Services.AddTransient<IUserService, UserService>();
             builder.Services.AddTransient<IEventService, EventService>();
             builder.Services.AddTransient<IBetService, BetService>();
+            builder.Services.AddTransient<IUserRepository, UserRepository>();
+            builder.Services.AddTransient<IBetRepository, BetRepository>();
+            builder.Services.AddTransient<IEventRepository, EventRepository>();
             builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
             builder.Services.AddHostedService<ConsumeScopedServiceHostedService>();
             builder.Services.AddScoped<IBackgroundConsumerService, BackgroundResultsConsumerService>();
