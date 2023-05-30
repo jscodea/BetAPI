@@ -12,12 +12,14 @@ namespace BetAPI.Services
     public class BetService: IBetService
     {
         private readonly IBetRepository _repository;
+        private readonly ILogger<BetService> _logger;
         private readonly IEventService _eventService;
         private readonly IUserService _userService;
 
-        public BetService(IBetRepository repository, IEventService eventService, IUserService userService)
+        public BetService(IBetRepository repository, ILogger<BetService> logger, IEventService eventService, IUserService userService)
         {
             _repository = repository;
+            _logger = logger;
             _eventService = eventService;
             _userService = userService;
         }
@@ -29,6 +31,7 @@ namespace BetAPI.Services
 
         public async Task<IPagedList<BetDTO>> GetBetsPagedAsync(int pageNumber, int pageSize = 50)
         {
+            _logger.LogInformation("Get paged bets triggered...");
             return await _repository.GetAllPagedWithInfoAsync(pageNumber, pageSize);
         }
 

@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace BetAPI.Helpers
@@ -26,6 +27,11 @@ namespace BetAPI.Helpers
         {
             var hashToCompare = Rfc2898DeriveBytes.Pbkdf2(password, salt, iterations, hashAlgorithm, keySize);
             return hashToCompare.SequenceEqual(Convert.FromHexString(hash));
+        }
+
+        public static string GetRandomSaltString()
+        {
+            return Convert.ToBase64String(RandomNumberGenerator.GetBytes(keySize));
         }
     }
 }

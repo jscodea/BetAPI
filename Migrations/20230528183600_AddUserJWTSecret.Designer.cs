@@ -4,6 +4,7 @@ using BetAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BetAPI.Migrations
 {
     [DbContext(typeof(BetAPIContext))]
-    partial class BetAPIContextModelSnapshot : ModelSnapshot
+    [Migration("20230528183600_AddUserJWTSecret")]
+    partial class AddUserJWTSecret
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,7 +66,7 @@ namespace BetAPI.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Bet", (string)null);
+                    b.ToTable("Bet");
                 });
 
             modelBuilder.Entity("BetAPI.Models.Event", b =>
@@ -103,7 +106,7 @@ namespace BetAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Event", (string)null);
+                    b.ToTable("Event");
                 });
 
             modelBuilder.Entity("BetAPI.Models.User", b =>
@@ -153,7 +156,7 @@ namespace BetAPI.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("User", (string)null);
+                    b.ToTable("User");
                 });
 
             modelBuilder.Entity("BetAPI.Models.Bet", b =>

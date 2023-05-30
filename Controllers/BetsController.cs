@@ -13,9 +13,11 @@ using BetAPI.Filters;
 using PagedList;
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BetAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [RenderableExceptionFilter]
     [ApiController]

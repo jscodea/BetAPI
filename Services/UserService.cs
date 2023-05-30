@@ -57,6 +57,9 @@ namespace BetAPI.Services
         public async Task<int> RegisterUser(string Username, string Password, string Firstname, string Lastname)
         {
             string HashedPassword = PasswordHelper.HashPasword(Password, out var salt);
+            //TODO in theory I guess I should salt this with some secure key and save in DB salted version
+            //then save salted version in e
+            string jWTSecret = PasswordHelper.GetRandomSaltString();
             User user = new User
             {
                 Username = Username,
@@ -64,6 +67,7 @@ namespace BetAPI.Services
                 FirstName = Firstname,
                 LastName = Lastname,
                 Salt = salt,
+                JWTSecret = jWTSecret,
                 IsActive = true,
                 Balance = 0
             };

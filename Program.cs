@@ -4,6 +4,11 @@ using BetAPI.Models;
 using BetAPI.Services;
 using BetAPI.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using BetAPI.Handlers;
+using System.Text;
 
 namespace BetAPI
 {
@@ -30,6 +35,39 @@ namespace BetAPI
             builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
             builder.Services.AddHostedService<ConsumeScopedServiceHostedService>();
             builder.Services.AddScoped<IBackgroundConsumerService, BackgroundResultsConsumerService>();
+            builder.Services.AddAuthentication(i =>
+            {
+                i.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                i.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                i.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    RequireSignedTokens = true,
+                    ValidateLifetime = true,
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    IssuerSigningKey = null
+                };
+                options.SecurityTokenValidators.Clear();
+                options.SecurityTokenValidators.Add(new DBKeyJWTValidationHandler(builder.Configuration.GetValue<string>("JwtSalt")));
+                /*options.Events = new JwtBearerEvents()
+                {
+                    OnChallenge = context =>
+                    {
+                        context.HandleResponse();
+                        return Task.FromResult(0);
+                    }
+                };*/
+            });
+
+            var logger = new LoggerConfiguration()
+              .ReadFrom.Configuration(builder.Configuration)
+              .Enrich.FromLogContext()
+              .CreateLogger();
+            builder.Logging.ClearProviders();
+            builder.Logging.AddSerilog(logger);
 
             var app = builder.Build();
 

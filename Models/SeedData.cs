@@ -65,12 +65,13 @@ namespace BetAPI.Models
                     {
                         string password = NextString(r, r.Next(3, 12));
                         string username = NextString(r, r.Next(3, 12));
-                        if (x == 0)
+                        if (i == 0 && x == 0)
                         {
                             password = "test";
                             username = "test";
                         }
                         string hashedPassword = PasswordHelper.HashPasword(password, out var salt);
+                        string jWTSecret = PasswordHelper.GetRandomSaltString();
                         string firstName = NextString(r, r.Next(3, 12));
                         string lastName = NextString(r, r.Next(3, 12));
                         User SomeUser = new User
@@ -79,6 +80,7 @@ namespace BetAPI.Models
                             LastName = lastName,
                             IsActive = true,
                             Salt = salt,
+                            JWTSecret = jWTSecret,
                             Username = username,
                             Password = hashedPassword,
                             Balance = (decimal)NextDouble(r, 0, 10000.00, 2),
