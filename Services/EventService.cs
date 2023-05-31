@@ -26,6 +26,11 @@ namespace BetAPI.Services
             return await _repository.GetAllWithInfoAsync();
         }
 
+        public async Task<List<EventDTO>> GetEventsEndedAsync()
+        {
+            return await _repository.GetEventsEndedAsync();
+        }
+
         public async Task<IPagedList<EventDTO>> GetEventsPagedAsync(int pageNumber, int pageSize = 50)
         {
             return await _repository.GetAllPagedWithInfoAsync(pageNumber, pageSize);

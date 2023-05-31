@@ -9,6 +9,7 @@ namespace BetAPI.Repositories
         Task<IPagedList<EventDTO>> GetAllPagedWithInfoAsync(int pageNumber, int pageSize = 50);
         Task<List<EventDTO>> GetAllWithInfoAsync();
         Task<EventDTO?> GetByIdWithInfoAsync(int id);
+        Task<List<EventDTO>> GetEventsEndedAsync();
         Task UpdateFromDTOAsync(int id, EventPutDTO ev);
     }
 }

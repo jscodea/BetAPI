@@ -4,6 +4,7 @@ using BetAPI.Generics;
 using BetAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using PagedList;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BetAPI.Repositories
 {
@@ -36,6 +37,15 @@ namespace BetAPI.Repositories
             Event? ev = await _context.Event.FirstOrDefaultAsync(i => i.Id == id);
 
             return ev != null ? new EventDTO().SetFromEvent(ev) : null;
+        }
+
+        public async Task<List<EventDTO>> GetEventsEndedAsync()
+        {
+            List<EventDTO> events = await _context.Event.Select(
+            s => new EventDTO().SetFromEvent(s)
+            ).Where(w => DateTime.Compare(w.EndsAt, DateTime.UtcNow) < 0 ).ToListAsync();
+
+            return events;
         }
 
         public async Task UpdateFromDTOAsync(int id, EventPutDTO ev)
