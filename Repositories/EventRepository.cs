@@ -41,9 +41,9 @@ namespace BetAPI.Repositories
 
         public async Task<List<EventDTO>> GetEventsEndedAsync()
         {
-            List<EventDTO> events = await _context.Event.Select(
+            List<EventDTO> events = await _context.Event.Where(w => DateTime.Compare(w.EndsAt, DateTime.UtcNow) < 0).Select(
             s => new EventDTO().SetFromEvent(s)
-            ).Where(w => DateTime.Compare(w.EndsAt, DateTime.UtcNow) < 0 ).ToListAsync();
+            ).ToListAsync();
 
             return events;
         }
