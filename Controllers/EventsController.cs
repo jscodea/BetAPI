@@ -45,6 +45,14 @@ namespace BetAPI.Controllers
             return events;
         }
 
+        // GET: api/EventsEnded
+        [HttpGet]
+        [Route("Ended")]
+        public async Task<List<EventDTO>> GetEventsEnded()
+        {
+            return await _eventService.GetEventsEndedAsync();
+        }
+
         // GET: api/Events/5
         [HttpGet("{id}")]
         public async Task<ActionResult<EventDTO>> GetEvent(int id)
