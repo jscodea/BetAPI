@@ -1,4 +1,6 @@
-﻿using Confluent.Kafka;
+﻿using BetAPI.DTO;
+using Confluent.Kafka;
+using Newtonsoft.Json;
 
 namespace BetAPI.Services
 {
@@ -6,13 +8,15 @@ namespace BetAPI.Services
     {
         private int executionCount = 0;
         private readonly ILogger _logger;
+        private readonly IBetService _betService;
         private readonly string topic = "results";
         private readonly string groupId = "local";
         private readonly string bootstrapServers = "localhost:29092";
 
-        public BackgroundResultsConsumerService(ILogger<BackgroundResultsConsumerService> logger)
+        public BackgroundResultsConsumerService(ILogger<BackgroundResultsConsumerService> logger, IBetService betService)
         {
             _logger = logger;
+            _betService = betService;
         }
 
         public async Task DoWork(CancellationToken stoppingToken)
@@ -34,6 +38,12 @@ namespace BetAPI.Services
                 var consumer = consumerBuilder.Consume(stoppingToken);
                 _logger.LogInformation(
                     "msg value: {Message}", consumer.Message.Value);
+
+                EventDTO eventDTO = JsonConvert.DeserializeObject<EventDTO>(consumer.Message.Value);
+                if (eventDTO.Result != null)
+                {
+                    _betService.BetSettleForEventAsync(eventDTO.Id, (int)eventDTO.Result);
+                }
 
                 executionCount++;
 
