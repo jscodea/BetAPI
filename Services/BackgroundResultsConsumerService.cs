@@ -9,14 +9,16 @@ namespace BetAPI.Services
         private int executionCount = 0;
         private readonly ILogger _logger;
         private readonly IBetService _betService;
+        private readonly IEventService _eventService;
         private readonly string topic = "results";
         private readonly string groupId = "local";
         private readonly string bootstrapServers = "localhost:29092";
 
-        public BackgroundResultsConsumerService(ILogger<BackgroundResultsConsumerService> logger, IBetService betService)
+        public BackgroundResultsConsumerService(ILogger<BackgroundResultsConsumerService> logger, IBetService betService, IEventService eventService)
         {
             _logger = logger;
             _betService = betService;
+            _eventService = eventService;
         }
 
         public async Task DoWork(CancellationToken stoppingToken)
@@ -40,7 +42,8 @@ namespace BetAPI.Services
                     "msg value: {Message}", consumer.Message.Value);
 
                 EventDTO eventDTO = JsonConvert.DeserializeObject<EventDTO>(consumer.Message.Value);
-                if (eventDTO.Result != null)
+                int eventResultTaskId = await _eventService.SetEventResult(eventDTO.Id, eventDTO.Id);
+                if (eventResultTaskId > 0 && eventDTO.Result != null)
                 {
                     _betService.BetSettleForEventAsync(eventDTO.Id, (int)eventDTO.Result);
                 }
