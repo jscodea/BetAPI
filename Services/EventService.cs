@@ -13,10 +13,12 @@ namespace BetAPI.Services
     public class EventService : IEventService
     {
         private readonly IEventRepository _repository;
+        private readonly IBetService _betService;
 
-        public EventService(IEventRepository repository)
+        public EventService(IEventRepository repository, IBetService betService)
         {
             _repository = repository;
+            _betService = betService;
         }
 
         public async Task<List<EventDTO>> GetEventsAsync()
@@ -54,6 +56,7 @@ namespace BetAPI.Services
                 throw new EventUnavailableException("Event does not exist for resulting.");
             }
             existingEvent.Result = Result;
+            await _betService.BetSettleForEventAsync(id, Result);
             return await _repository.SaveAsync();
         }
     }

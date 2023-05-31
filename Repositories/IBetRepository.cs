@@ -10,5 +10,7 @@ namespace BetAPI.Repositories
         Task<List<BetDTO>> GetAllWithInfoAsync();
         Task<BetDTO?> GetByIdWithInfoAsync(int id);
         Task UpdateFromDTOAsync(int id, BetPutDTO bet);
+
+        Task<List<BetDTO>> GetBetsByEventIdAsync(int eventId);
     }
 }

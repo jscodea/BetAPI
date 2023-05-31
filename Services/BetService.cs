@@ -40,6 +40,11 @@ namespace BetAPI.Services
             return await _repository.GetByIdWithInfoAsync(id);
         }
 
+        public async Task<List<BetDTO>> GetBetsByEventIdAsync(int eventId)
+        {
+            return await _repository.GetBetsByEventIdAsync(eventId);
+        }
+
         public async Task<int> InsertBetAsync(Bet bet)
         {
             await _repository.InsertAsync(bet);
@@ -131,6 +136,20 @@ namespace BetAPI.Services
                 return false;
             }
             return true;
+        }
+
+        public async Task BetSettleForEventAsync(int eventId, int winningOpt)
+        {
+            var betsForSettle = await GetBetsByEventIdAsync(eventId);
+            foreach (BetDTO bet in betsForSettle)
+            {
+                if (bet.Opt == winningOpt)
+                {
+                    BetSettleAsync(bet.Id, bet.Odds * bet.Stake);
+                    continue;
+                }
+                BetSettleAsync(bet.Id, 0);
+            }
         }
 
         private decimal GetEventOdds(int Opt, decimal Opt1, decimal Opt2)

@@ -44,5 +44,14 @@ namespace BetAPI.Repositories
             existingBet.IsCompleted = bet.IsCompleted;
             existingBet.Payout = bet.Payout;
         }
+
+        public async Task<List<BetDTO>> GetBetsByEventIdAsync(int eventId)
+        {
+            List<BetDTO> bets = await _context.Bet.Include(p => p.User).Include(p => p.Event).Where(p => p.EventId == eventId).Select(
+                  s => new BetDTO().SetFromBet(s)
+              ).ToListAsync();
+
+            return bets;
+        }
     }
 }
